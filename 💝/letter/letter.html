@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>For GU GU</title>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background: url("df0523a1e4ca55181aee1c6a7177875d (1).jpg") center / cover fixed no-repeat;
+      background-color: #806332;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: rgba(50, 30, 5, 0.12);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* ===== COVER (tap to open) ===== */
+    .cover {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: #2b1b05;
+      color: #f5e6c8;
+      font-family: sans-serif;
+      font-size: 18px;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: opacity 1s ease;
+    }
+    .cover .icon { font-size: 56px; }
+    .cover.hide { opacity: 0; pointer-events: none; }
+
+    /* ===== MAIN PAGE ===== */
+    .page {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 6vh 0 12vh;
+    }
+
+    .paper-wrapper {
+      position: relative;
+      width: min(90vw, 736px);
+      opacity: 0;
+      transform: translateY(30px) scale(0.98);
+      animation: paperAppear 2.5s ease forwards;
+      animation-delay: 1.2s;
+      animation-play-state: paused;
+    }
+
+    .paper {
+      display: block;
+      width: 100%;
+      height: auto;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .message {
+      position: absolute;
+      top: 7%;
+      left: 9%;
+      right: 9%;
+      color: #060000;
+      font-family: "Noto Sans Myanmar", "Myanmar Text", "Padauk", sans-serif;
+      font-size: clamp(11px, 1.7vw, 17px);
+      line-height: 1.8;
+      text-align: left;
+      white-space: pre-wrap;
+      word-break: break-word;
+      text-shadow: 0 0 0.5px rgba(150, 0, 0, 0.4);
+      opacity: 0;
+    }
+
+    .close-button {
+      margin-top: 30px;
+      width: 58px;
+      height: 58px;
+      border: none;
+      border-radius: 50%;
+      background: #00a8d6;
+      color: white;
+      font-size: 30px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transform: scale(0.8);
+      animation: buttonAppear 1s ease forwards;
+      animation-delay: 4s;
+      animation-play-state: paused;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+    .close-button:hover { background: #008fba; transform: scale(1.08); }
+    .close-button:active { transform: scale(0.94); }
+
+    /* Animations wait until she taps */
+    .started .paper-wrapper,
+    .started .close-button { animation-play-state: running; }
+
+    /* ===== MUSIC BUTTON ===== */
+    #playBtn {
+      position: fixed;
+      top: 14px;
+      right: 14px;
+      z-index: 5;
+      padding: 8px 14px;
+      border: none;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.45);
+      color: #fff;
+      font-family: sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    @keyframes paperAppear {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes messageAppear {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes buttonAppear {
+      from { opacity: 0; transform: scale(0.8); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    @media (max-width: 600px) {
+      .page { padding-top: 4vh; padding-bottom: 10vh; }
+      .paper-wrapper { width: 94vw; }
+      .message { top: 7%; left: 8%; right: 8%; font-size: 11px; line-height: 1.7; }
+      .close-button { width: 52px; height: 52px; font-size: 27px; }
+    }
+
+    @media (max-width: 380px) {
+      .message { font-size: 10px; line-height: 1.65; }
+      .close-button { width: 46px; height: 46px; font-size: 24px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Tap to open -->
+  <div class="cover" id="cover">
+    <div class="icon">💌</div>
+    <p>Tap to open</p>
+  </div>
+
+  <audio id="bgMusic" loop preload="auto">
+    <source src="Purple Wink pGb.mp3">
+  </audio>
+
+  <button id="playBtn" type="button">▶ Play Music</button>
+
+  <main class="page">
+
+    <div class="paper-wrapper">
+      <img src="785cbe8c6e97418030f83913a6ead14e.jpg" class="paper" alt="Vintage paper">
+      <div class="message" id="message"></div>
+    </div>
+
+    <button class="close-button" id="closeButton" aria-label="Close" title="Close">×</button>
+
+  </main>
+
+  <script>
+
+    const text = `သို့ချစ်ရပါသောဂူးဂူး,
+
+    အကိုဖွင့်ပြောလိုက်တာအရမ်းမြန်တယ်ဆိုတာအကိုသိပါတယ်။ အကိုဂူးဂူးကိုအဆုံးရှူံးမခံချင်လို့‌ ဖွင့်မပြောလိုက်ရင်နောင်တပေါင်းများစွာနဲ့အသက်ဆက်ရှင်မိနေမှာစိုးလို့ဂူးဂူးကိုအကိုဖွင့်ပြောလိုက်ပါတယ်နော်။ 
+    
+    အကိုဂူးဂူးကိုစတွေ့တည်းကဘာကြောင့်မှန်းမသိအရင်တည်းကသိဖူးသလိုခံစားရတာရော ရေစက်လိုပဲပြောရမလားချစ်မိသွားတယ်ဗျာ။ 
+    
+    အကိုဂူးဂူးကိုချစ်တာကိုသေချာအောင်ဆုံးဖြတ်ပြီးမှပြောချင်ပေမဲ့လို့အခုတော့ဘာမှမလိုဘဲသေချာသွားပြီဆိုတာသိလိုက်ရပါပြီ။ 
+    
+    ဂူးဂူးကအပြင်ပိုင်းကြည့်ရင်လှတယ်ဆိုတာလူတိုင်း အရှင်းဆုံးပြောရရင်မျက်လုံးပါတဲ့လူတိုင်းသိကြတယ်ဆိုပေမဲ့လို့ဂူးဂူးရဲ့ personality ကပါလှပသိမ်မွေ့လွန်းလှပြီးချစ်ဖို့ကောင်းတာကိုအကိုသိလိုက်ရတဲ့အချိန်တည်းက အကိုဂူးဂူးကိုမဆုံရှူံးချင်တော့ဘူးဗျာ။
+   
+    အကိုကအခုချိန်မှာဘာမှမဟုတ်သေးပေမဲ့လို့အကိုဂူးဂူးအတွက်ကြိုးစားပြီးဘေးဩနားအမြဲရှိနေမှာပါ။ 
+    
+    ဂူးဂူးအလုပ်ပင်ပန်းလာလို့ရော၊ စိတ်မကောင်းဖြစ်တဲ့အချိန်‌ရော၊ မိသားစုနဲ့အဆင်မပြေတဲ့အချိန်တွေရော အကိုဂူးဂူးအတွက်အမြဲရှိနေမှာပါ။ 
+    အကိုကဂူးဂူးကိုအမြဲချစ်နေမှာပါ။    
+
+အခုချိန်ဂူးဂူးအကို့ကိုငြင်းလိုက်ရင်လဲနဲ့ထိုက်တန်ပြီလို့ထင်တဲ့နေ့ ဂူးဂူးမှာလဲဆိုင်သူမရှိသေးရင် အကိုကို့ကိုအခါခါအငြင်းခံရမယ်ဆိုလဲ ပြန်ပြီးကြိုးစားပါ့မယ်နော်။
+
+နှစ်ယောက်ကြားတစ်ခုခုမရှိဖြစ်ခဲ့ရင်လဲဂူးဂူးအတွက်အကိုအမြဲရှိနေပါ့မယ်ဗျာ။
+
+ချစ်ခြင်းများစွာဖြင့် ကိုသုခန့်အောင်`;
+
+    const message = document.getElementById("message");
+    const cover = document.getElementById("cover");
+    const music = document.getElementById("bgMusic");
+    const playBtn = document.getElementById("playBtn");
+
+    const messageStartDelay = 4200;
+    const typingSpeed = 25;
+
+    /* ===== TYPEWRITER ===== */
+    function typeMessage() {
+      message.style.animation = "messageAppear 1.5s ease forwards";
+      let index = 0;
+
+      function typeNextCharacter() {
+        if (index < text.length) {
+          message.textContent += text[index];
+          index++;
+          setTimeout(typeNextCharacter, typingSpeed);
+        }
+      }
+      typeNextCharacter();
+    }
+
+    /* ===== MUSIC ===== */
+    function playMusic() {
+      if (music.paused) {
+        music.play()
+          .then(() => { playBtn.textContent = "⏸ Pause Music"; })
+          .catch(err => console.log("Music error:", err));
+      } else {
+        music.pause();
+        playBtn.textContent = "▶ Play Music";
+      }
+    }
+    playBtn.addEventListener("click", playMusic);
+
+    /* ===== OPEN (tap unlocks music + starts animations) ===== */
+    function openGift() {
+      document.body.classList.add("started");
+      cover.classList.add("hide");
+
+      music.volume = 0.6;
+      music.play()
+        .then(() => { playBtn.textContent = "⏸ Pause Music"; })
+        .catch(err => console.log("Music error:", err));
+
+      setTimeout(typeMessage, messageStartDelay);
+    }
+    cover.addEventListener("click", openGift, { once: true });
+
+    /* ===== CLOSE BUTTON ===== */
+    document.getElementById("closeButton").addEventListener("click", function () {
+      window.close();
+      setTimeout(function () {
+        if (!window.closed) {
+          if (history.length > 1) {
+            history.back();
+          } else {
+            alert("You can close this tab now ❤️");
+          }
+        }
+      }, 300);
+    });
+
+  </script>
+
+</body>
+</html>
